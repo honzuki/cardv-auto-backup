@@ -4,6 +4,7 @@ use std::time::Duration;
 
 use eframe::egui;
 
+mod execution_state;
 mod gui;
 mod tg;
 mod usb;

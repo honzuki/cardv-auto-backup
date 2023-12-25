@@ -2,6 +2,7 @@ use eframe::Storage;
 use egui::{Color32, ProgressBar, RichText, Spinner};
 
 use crate::{
+    execution_state::ExecutionState,
     tg::Bot,
     usb::{DriveUploader, UploaderMsg},
 };
@@ -27,6 +28,9 @@ struct UploadingState {
     current_name: Option<String>,
     current: usize,
     total: usize,
+    // prevent the computer from going
+    // to sleep while we upload the files
+    _exec_state: ExecutionState,
 }
 
 impl UploadingState {
@@ -77,6 +81,7 @@ impl Uploader {
                         current_name: None,
                         current: 0,
                         total,
+                        _exec_state: ExecutionState::away_system(),
                     })
                 }
                 (State::Uploading(uploading), UploaderMsg::Update(update)) => {
