@@ -36,9 +36,6 @@ pub enum BotErr {
 
     #[error("failed to extract the video attribute from path")]
     NoVideoAttribute,
-
-    #[error("failed to create a thumbnail from the video")]
-    NoThumbnail,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -81,7 +78,7 @@ impl Bot {
     }
 
     /// Try to load the bot from its packed version
-    #[tracing::instrument]
+    #[tracing::instrument(level = "debug")]
     pub async fn from_packed(packed: PackedBot) -> Result<Self, BotErr> {
         let target_channel =
             PackedChat::from_bytes(&packed.target_chat).map_err(|_| BotErr::CorruptedTargetChat)?;
@@ -113,6 +110,7 @@ impl Bot {
     }
 
     /// Uploads an mp4 video to the target channel
+    #[tracing::instrument]
     pub async fn upload_mp4(
         &self,
         path: impl AsRef<Path> + Debug + Clone + Send + 'static,

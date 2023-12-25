@@ -1,21 +1,4 @@
-[package]
-name = "cardv-auto-backup"
-version = "0.1.0"
-edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
-eframe = "0.24.1"
-egui = { version = "0.24.1", features = ["persistence"] }
-grammers-client = { git = "https://github.com/Lonami/grammers" }
-grammers-mtsender = { git = "https://github.com/Lonami/grammers" }
-grammers-session = { git = "https://github.com/Lonami/grammers" }
-mp4 = "0.14.0"
-reqwest = "0.11.23"
-serde = { version = "1.0.193", features = ["derive"] }
-serde_json = "1.0.108"
-thiserror = "1.0.51"
-tokio = { version = "1.35.1", features = ["rt-multi-thread", "macros"] }
-tracing = "0.1.40"
-tracing-subscriber = "0.3.18"
+[workspace]
+members = ["crates/*"]
+default-members = ["crates/cardv-auto-backup"]
+resolver = "2"
