@@ -1,5 +1,5 @@
 use egui::TextBuffer;
-use std::{collections::HashSet, fs, io, path::PathBuf};
+use std::{collections::HashSet, fs, io, path::PathBuf, time::Duration};
 use tokio::sync::mpsc as tokio_mpsc;
 
 use crate::tg::{Bot, BotErr};
@@ -124,7 +124,7 @@ impl DriveUploader {
 
 #[tracing::instrument(skip(files))]
 async fn drive_upload_worker(
-    bot: Bot,
+    mut bot: Bot,
     files: Vec<PathBuf>,
     skip: usize,
     tx: tokio_mpsc::UnboundedSender<UploaderMsg>,
@@ -142,7 +142,25 @@ async fn drive_upload_worker(
             tracing::info!("early termination of upload worker because listener was dropped");
             return Ok(());
         }
-        bot.upload_mp4(file.clone()).await?;
+
+        // retry every increasing interval until successfull upload
+        let mut interval = 60 * 10;
+        loop {
+            // Wait a bit to avoid hiting rate limits
+            tokio::time::sleep(Duration::from_secs(30)).await;
+            // re-login to reset connection issues
+            bot = Bot::from_packed(bot.packed()).await?;
+
+            if let Ok(res) =
+                tokio::time::timeout(Duration::from_secs(interval), bot.upload_mp4(file.clone()))
+                    .await
+            {
+                res?;
+                break;
+            }
+
+            interval += 60;
+        }
         let _ = tx.send(UploaderMsg::Uploaded(file));
     }
 
